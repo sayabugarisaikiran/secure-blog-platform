@@ -54,6 +54,21 @@ docker-compose logs -f
 | http://localhost:3000/api/health | 💚 Health Check |
 | http://localhost:3000/api/posts | 📜 Posts API |
 
+### 🔌 Port Information
+
+| Port | Service | Container | Purpose | Public Access |
+|---|---|---|---|---|
+| **80** | Nginx | `frontend` | HTTP web server (blog + admin UI) | ✅ Required |
+| **3000** | Node.js | `backend` | Express API server | ⚠️ Optional (for direct API testing) |
+| **5432** | PostgreSQL | `db` | Database server | ❌ Internal only |
+
+**For EC2/Remote Deployment:**
+- **Port 80** must be open in Security Group for web access
+- Access via: `http://YOUR_EC2_PUBLIC_IP/`
+- Admin panel: `http://YOUR_EC2_PUBLIC_IP/admin.html`
+- Port 3000 can remain closed (frontend proxies API requests via Nginx)
+- Port 5432 should **never** be exposed publicly (database is internal)
+
 ### First-Time Setup
 1. Open http://localhost/admin.html
 2. Click "Create Account"
