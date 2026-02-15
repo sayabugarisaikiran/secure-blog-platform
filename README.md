@@ -8,23 +8,144 @@ A **3-Tier Architecture** web application built with modern DevOps practices.
 
 ## 🏗️ Architecture
 
+### Local Development (Docker Compose)
 ```
 ┌──────────────────────────────────────────────────────┐
 │              TIER 1 — PRESENTATION                   │
 │  Nginx (Docker) → serves frontend + proxies API      │
-│  Production: Route53 → CloudFront → WAF → ACM        │
 ├──────────────────────────────────────────────────────┤
 │              TIER 2 — APPLICATION                    │
 │  Node.js + Express API (Docker)                       │
 │  JWT Auth • Blog CRUD • Health Check                  │
-│  Production: ALB → ECS Fargate                        │
 ├──────────────────────────────────────────────────────┤
 │              TIER 3 — DATA                           │
 │  PostgreSQL 15 (Docker)                               │
 │  Users • Posts                                        │
-│  Production: AWS RDS                                  │
 └──────────────────────────────────────────────────────┘
 ```
+
+### Production AWS Deployment (Multi-AZ)
+
+```mermaid
+graph TB
+    subgraph Internet["🌐 Internet"]
+        User["👤 Users"]
+    end
+
+    subgraph AWS["☁️ AWS Cloud"]
+        subgraph Global["Global Services"]
+            Route53["🌍 Route53<br/>DNS"]
+            CloudFront["⚡ CloudFront<br/>CDN + Edge Cache"]
+            WAF["🛡️ WAF<br/>Web Application Firewall"]
+            ACM["🔐 ACM<br/>SSL/TLS Certificate"]
+        end
+
+        subgraph Region["us-east-1 Region"]
+            subgraph VPC["VPC (10.0.0.0/16)"]
+                
+                subgraph AZ1["Availability Zone 1"]
+                    subgraph PublicAZ1["Public Subnet (10.0.1.0/24)"]
+                        ALB1["⚖️ ALB<br/>Target Group"]
+                        NAT1["🔄 NAT Gateway"]
+                    end
+                    subgraph PrivateAZ1["Private Subnet (10.0.11.0/24)"]
+                        ECS1["🐳 ECS Fargate Task<br/>Frontend + Backend"]
+                    end
+                    subgraph DataAZ1["Data Subnet (10.0.21.0/24)"]
+                        RDS1["🗄️ RDS Primary<br/>PostgreSQL 15"]
+                    end
+                end
+
+                subgraph AZ2["Availability Zone 2"]
+                    subgraph PublicAZ2["Public Subnet (10.0.2.0/24)"]
+                        ALB2["⚖️ ALB<br/>Target Group"]
+                        NAT2["🔄 NAT Gateway"]
+                    end
+                    subgraph PrivateAZ2["Private Subnet (10.0.12.0/24)"]
+                        ECS2["🐳 ECS Fargate Task<br/>Frontend + Backend"]
+                    end
+                    subgraph DataAZ2["Data Subnet (10.0.22.0/24)"]
+                        RDS2["🗄️ RDS Standby<br/>PostgreSQL 15"]
+                    end
+                end
+
+                IGW["🌐 Internet Gateway"]
+                SG_ALB["🔒 Security Group: ALB<br/>Inbound: 80, 443"]
+                SG_ECS["🔒 Security Group: ECS<br/>Inbound: 3000 (from ALB)"]
+                SG_RDS["🔒 Security Group: RDS<br/>Inbound: 5432 (from ECS)"]
+            end
+
+            ECR["📦 ECR<br/>Container Registry"]
+            SecretsManager["🔑 Secrets Manager<br/>DB Credentials"]
+            CloudWatch["📊 CloudWatch<br/>Logs + Metrics"]
+        end
+    end
+
+    User --> Route53
+    Route53 --> CloudFront
+    CloudFront --> WAF
+    WAF --> ACM
+    ACM --> IGW
+    IGW --> ALB1
+    IGW --> ALB2
+    
+    ALB1 --> ECS1
+    ALB2 --> ECS2
+    
+    ECS1 --> RDS1
+    ECS2 --> RDS1
+    
+    RDS1 -.Replication.-> RDS2
+    
+    ECS1 --> NAT1
+    ECS2 --> NAT2
+    NAT1 --> IGW
+    NAT2 --> IGW
+    
+    ECS1 -.Pull Images.-> ECR
+    ECS2 -.Pull Images.-> ECR
+    
+    ECS1 -.Get Secrets.-> SecretsManager
+    ECS2 -.Get Secrets.-> SecretsManager
+    
+    ECS1 -.Send Logs.-> CloudWatch
+    ECS2 -.Send Logs.-> CloudWatch
+    ALB1 -.Send Logs.-> CloudWatch
+    ALB2 -.Send Logs.-> CloudWatch
+
+    style User fill:#4A90E2
+    style Route53 fill:#FF9900
+    style CloudFront fill:#FF9900
+    style WAF fill:#DD344C
+    style ACM fill:#DD344C
+    style ALB1 fill:#FF9900
+    style ALB2 fill:#FF9900
+    style ECS1 fill:#FF9900
+    style ECS2 fill:#FF9900
+    style RDS1 fill:#3B48CC
+    style RDS2 fill:#3B48CC
+    style ECR fill:#FF9900
+    style SecretsManager fill:#DD344C
+    style CloudWatch fill:#FF9900
+```
+
+### Architecture Components
+
+| Layer | Component | Purpose | High Availability |
+|---|---|---|---|
+| **DNS** | Route53 | Domain routing | ✅ Global service |
+| **CDN** | CloudFront | Edge caching, DDoS protection | ✅ Global edge locations |
+| **Security** | WAF | OWASP Top 10 protection | ✅ Integrated with CloudFront |
+| **SSL/TLS** | ACM | Free HTTPS certificates | ✅ Auto-renewal |
+| **Load Balancer** | ALB | Distribute traffic across AZs | ✅ Multi-AZ deployment |
+| **Compute** | ECS Fargate | Serverless containers | ✅ Tasks in 2+ AZs |
+| **Database** | RDS PostgreSQL | Managed database | ✅ Multi-AZ with auto-failover |
+| **Networking** | VPC | Network isolation | ✅ Spans multiple AZs |
+| **NAT** | NAT Gateway | Outbound internet for private subnets | ✅ One per AZ |
+| **Registry** | ECR | Docker image storage | ✅ Regional service |
+| **Secrets** | Secrets Manager | Encrypted credential storage | ✅ Regional service |
+| **Monitoring** | CloudWatch | Logs, metrics, alarms | ✅ Regional service |
+
 
 ## 🚀 Quick Start (Local Development)
 
