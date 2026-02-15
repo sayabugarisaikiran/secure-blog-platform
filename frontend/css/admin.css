@@ -1,0 +1,199 @@
+/* ============================================================
+   Admin Panel — Additional Styles
+   ============================================================ */
+
+.admin-section {
+    padding: 48px 0;
+}
+
+/* ===== Login Card ===== */
+.login-card {
+    max-width: 420px;
+    margin: 0 auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px 32px;
+}
+
+.login-card h2 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+
+.login-sub {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+}
+
+/* ===== Form Elements ===== */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    margin-bottom: 14px;
+}
+
+.form-success {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    margin-bottom: 14px;
+}
+
+.login-divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+.login-divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: var(--border);
+}
+
+.login-divider span {
+    background: var(--bg-card);
+    padding: 0 16px;
+    position: relative;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+}
+
+/* ===== Dashboard ===== */
+.dashboard-header {
+    margin-bottom: 32px;
+}
+
+.dashboard-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.dashboard-header p {
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* ===== Cards ===== */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 24px;
+}
+
+.card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.card-header h3 {
+    margin-bottom: 0;
+}
+
+/* ===== Admin Posts List ===== */
+.admin-posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-post-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.admin-post-item:hover {
+    border-color: var(--primary);
+}
+
+.admin-post-info h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.admin-post-info .meta {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.admin-post-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.muted {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 20px;
+}

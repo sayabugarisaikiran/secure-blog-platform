@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Secure Blog Platform — A modern DevOps-powered blog">
+  <title>Secure Blog Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- ========== Navigation ========== -->
+  <nav class="navbar">
+    <div class="container nav-content">
+      <a href="/" class="logo">
+        <span class="logo-icon">📝</span>
+        <span class="logo-text">SecureBlog</span>
+      </a>
+      <div class="nav-links">
+        <a href="/" class="nav-link active">Home</a>
+        <a href="admin.html" class="nav-link">Admin</a>
+        <span class="badge">DevOps Project</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========== Hero Section ========== -->
+  <header class="hero">
+    <div class="container">
+      <h1 class="hero-title">Secure Blog Platform</h1>
+      <p class="hero-subtitle">
+        A 3-Tier Architecture Demo — Built with DevOps Best Practices
+      </p>
+      <div class="hero-tags">
+        <span class="tag">Docker</span>
+        <span class="tag">Terraform</span>
+        <span class="tag">CI/CD</span>
+        <span class="tag">AWS</span>
+        <span class="tag">DevSecOps</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== Architecture Banner ========== -->
+  <section class="architecture-banner">
+    <div class="container">
+      <div class="arch-flow">
+        <div class="arch-item">
+          <div class="arch-icon">🌐</div>
+          <div class="arch-label">Route53</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-item">
+          <div class="arch-icon">⚡</div>
+          <div class="arch-label">CloudFront</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-item">
+          <div class="arch-icon">🛡️</div>
+          <div class="arch-label">WAF</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-item">
+          <div class="arch-icon">⚖️</div>
+          <div class="arch-label">ALB</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-item highlight">
+          <div class="arch-icon">🐳</div>
+          <div class="arch-label">ECS</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-item">
+          <div class="arch-icon">🗄️</div>
+          <div class="arch-label">RDS</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== Blog Posts ========== -->
+  <main class="container">
+    <section class="posts-section">
+      <div class="section-header">
+        <h2>Latest Posts</h2>
+        <div class="api-status" id="apiStatus">
+          <span class="status-dot"></span>
+          <span class="status-text">Connecting...</span>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading posts...</p>
+      </div>
+
+      <!-- Error State -->
+      <div id="error" class="error-state" style="display: none;">
+        <div class="error-icon">⚠️</div>
+        <h3>Could not load posts</h3>
+        <p id="errorMessage">Check if the backend is running.</p>
+        <button onclick="loadPosts()" class="btn btn-primary">Retry</button>
+      </div>
+
+      <!-- Posts Grid -->
+      <div id="postsGrid" class="posts-grid" style="display: none;"></div>
+
+      <!-- No Posts State -->
+      <div id="noPosts" class="no-posts" style="display: none;">
+        <div class="no-posts-icon">📝</div>
+        <h3>No posts yet</h3>
+        <p>Create your first post from the <a href="admin.html">Admin Panel</a></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========== Footer ========== -->
+  <footer class="footer">
+    <div class="container">
+      <p>Secure Blog Platform — 3-Tier DevOps Project</p>
+      <p class="footer-sub">Docker • Terraform • GitHub Actions • AWS ECS • WAF • CloudFront • DevSecOps</p>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

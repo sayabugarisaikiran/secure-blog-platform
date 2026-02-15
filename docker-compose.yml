@@ -1,0 +1,86 @@
+# ============================================================
+# Docker Compose — Full 3-Tier Local Development
+# ============================================================
+#
+# Tier 1 (Presentation):  frontend  → Nginx (port 80)
+# Tier 2 (Application):   backend   → Node.js (port 3000)
+# Tier 3 (Data):           db       → PostgreSQL (port 5432)
+#
+# Usage:
+#   docker-compose up -d          → Start all services
+#   docker-compose logs -f        → View logs
+#   docker-compose down           → Stop all services
+#   docker-compose down -v        → Stop + delete data
+# ============================================================
+
+version: '3.8'
+
+services:
+  # ========== Tier 3: Database (PostgreSQL) ==========
+  db:
+    image: postgres:15-alpine
+    container_name: blog-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: blogdb
+      POSTGRES_USER: bloguser
+      POSTGRES_PASSWORD: blogpass123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bloguser -d blogdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========== Tier 2: Application (Node.js API) ==========
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: blog-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: blogdb
+      DB_USER: bloguser
+      DB_PASSWORD: blogpass123
+      JWT_SECRET: dev-secret-key-change-this-in-production
+      JWT_EXPIRES_IN: 24h
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - blog-network
+
+  # ========== Tier 1: Presentation (Nginx) ==========
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: blog-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - blog-network
+
+# ========== Shared Network ==========
+networks:
+  blog-network:
+    driver: bridge
+
+# ========== Persistent Volume for DB ==========
+volumes:
+  postgres-data:

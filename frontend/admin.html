@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Secure Blog Platform — Admin Panel">
+    <title>Admin Panel — Secure Blog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+    <!-- ========== Navigation ========== -->
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="/" class="logo">
+                <span class="logo-icon">📝</span>
+                <span class="logo-text">SecureBlog</span>
+            </a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="admin.html" class="nav-link active">Admin</a>
+                <button id="logoutBtn" class="btn btn-outline btn-sm" style="display:none;"
+                    onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== Login Section ========== -->
+    <section id="loginSection" class="container admin-section">
+        <div class="login-card">
+            <h2>🔐 Admin Login</h2>
+            <p class="login-sub">Sign in to manage blog posts</p>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="admin@test.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <div id="loginError" class="form-error" style="display:none;"></div>
+                <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+            </form>
+            <div class="login-divider">
+                <span>New here?</span>
+            </div>
+            <button onclick="toggleRegister()" class="btn btn-outline btn-full" id="toggleRegBtn">Create
+                Account</button>
+
+            <!-- Register Form (hidden by default) -->
+            <form id="registerForm" onsubmit="handleRegister(event)" style="display:none;">
+                <div class="form-group">
+                    <label for="regUsername">Username</label>
+                    <input type="text" id="regUsername" placeholder="admin" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Email</label>
+                    <input type="email" id="regEmail" placeholder="admin@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <input type="password" id="regPassword" placeholder="Min 6 characters" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="regRole">Role</label>
+                    <select id="regRole">
+                        <option value="admin">Admin</option>
+                        <option value="user">User</option>
+                    </select>
+                </div>
+                <div id="registerError" class="form-error" style="display:none;"></div>
+                <button type="submit" class="btn btn-primary btn-full">Register</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- ========== Admin Dashboard (shown after login) ========== -->
+    <section id="dashboardSection" class="container admin-section" style="display:none;">
+        <div class="dashboard-header">
+            <h2>📊 Dashboard</h2>
+            <p>Welcome, <span id="adminName"></span>!</p>
+        </div>
+
+        <!-- Create Post Form -->
+        <div class="card create-post-card">
+            <h3>✍️ Create New Post</h3>
+            <form id="createPostForm" onsubmit="handleCreatePost(event)">
+                <div class="form-group">
+                    <label for="postTitle">Title</label>
+                    <input type="text" id="postTitle" placeholder="Enter post title" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label for="postContent">Content</label>
+                    <textarea id="postContent" rows="6" placeholder="Write your blog post content..."
+                        required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="postStatus">Status</label>
+                    <select id="postStatus">
+                        <option value="published">Published</option>
+                        <option value="draft">Draft</option>
+                    </select>
+                </div>
+                <div id="createPostMsg" class="form-success" style="display:none;"></div>
+                <button type="submit" class="btn btn-primary">Publish Post</button>
+            </form>
+        </div>
+
+        <!-- All Posts List -->
+        <div class="card">
+            <div class="card-header">
+                <h3>📋 All Posts</h3>
+                <button onclick="loadAdminPosts()" class="btn btn-outline btn-sm">Refresh</button>
+            </div>
+            <div id="adminPostsList" class="admin-posts-list">
+                <p class="muted">Loading posts...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== Footer ========== -->
+    <footer class="footer">
+        <div class="container">
+            <p>Secure Blog Platform — Admin Panel</p>
+            <p class="footer-sub">Protected by JWT Authentication + Role-Based Access Control</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>

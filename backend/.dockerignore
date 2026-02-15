@@ -1,0 +1,12 @@
+# ============================================================
+# .dockerignore — Keep Docker image small
+# ============================================================
+node_modules
+npm-debug.log
+.env
+.git
+.gitignore
+tests
+coverage
+README.md
+.eslintrc.js
