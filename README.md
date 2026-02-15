@@ -32,101 +32,91 @@ graph TB
         User["👤 Users"]
     end
 
-    subgraph AWS["☁️ AWS Cloud"]
-        subgraph Global["Global Services"]
-            Route53["🌍 Route53<br/>DNS"]
-            CloudFront["⚡ CloudFront<br/>CDN + Edge Cache"]
-            WAF["🛡️ WAF<br/>Web Application Firewall"]
-            ACM["🔐 ACM<br/>SSL/TLS Certificate"]
-        end
-
-        subgraph Region["us-east-1 Region"]
-            subgraph VPC["VPC (10.0.0.0/16)"]
-                
-                subgraph AZ1["Availability Zone 1"]
-                    subgraph PublicAZ1["Public Subnet (10.0.1.0/24)"]
-                        ALB1["⚖️ ALB<br/>Target Group"]
-                        NAT1["🔄 NAT Gateway"]
-                    end
-                    subgraph PrivateAZ1["Private Subnet (10.0.11.0/24)"]
-                        ECS1["🐳 ECS Fargate Task<br/>Frontend + Backend"]
-                    end
-                    subgraph DataAZ1["Data Subnet (10.0.21.0/24)"]
-                        RDS1["🗄️ RDS Primary<br/>PostgreSQL 15"]
-                    end
-                end
-
-                subgraph AZ2["Availability Zone 2"]
-                    subgraph PublicAZ2["Public Subnet (10.0.2.0/24)"]
-                        ALB2["⚖️ ALB<br/>Target Group"]
-                        NAT2["🔄 NAT Gateway"]
-                    end
-                    subgraph PrivateAZ2["Private Subnet (10.0.12.0/24)"]
-                        ECS2["🐳 ECS Fargate Task<br/>Frontend + Backend"]
-                    end
-                    subgraph DataAZ2["Data Subnet (10.0.22.0/24)"]
-                        RDS2["🗄️ RDS Standby<br/>PostgreSQL 15"]
-                    end
-                end
-
-                IGW["🌐 Internet Gateway"]
-                SG_ALB["🔒 Security Group: ALB<br/>Inbound: 80, 443"]
-                SG_ECS["🔒 Security Group: ECS<br/>Inbound: 3000 (from ALB)"]
-                SG_RDS["🔒 Security Group: RDS<br/>Inbound: 5432 (from ECS)"]
-            end
-
-            ECR["📦 ECR<br/>Container Registry"]
-            SecretsManager["🔑 Secrets Manager<br/>DB Credentials"]
-            CloudWatch["📊 CloudWatch<br/>Logs + Metrics"]
-        end
+    subgraph Global["☁️ AWS Global Services"]
+        Route53["🌍 Route53<br/>DNS Resolution"]
+        CloudFront["⚡ CloudFront + WAF + ACM<br/>CDN / Firewall / HTTPS"]
     end
 
+    subgraph Region["us-east-1 Region"]
+        subgraph VPC["VPC (10.0.0.0/16)"]
+            IGW["🌐 Internet Gateway"]
+            
+            subgraph PublicSubnets["Public Subnets"]
+                subgraph Pub1["Public Subnet AZ-1 (10.0.1.0/24)"]
+                    ALB_ENI1["⚖️ ALB Node"]
+                    NAT1["🔄 NAT Gateway"]
+                end
+                subgraph Pub2["Public Subnet AZ-2 (10.0.2.0/24)"]
+                    ALB_ENI2["⚖️ ALB Node"]
+                    NAT2["� NAT Gateway"]
+                end
+            end
+
+            subgraph PrivateSubnets["Private Subnets (App Tier)"]
+                subgraph Priv1["Private Subnet AZ-1 (10.0.11.0/24)"]
+                    ECS1["🐳 ECS Fargate Task<br/>Frontend + Backend<br/>SG: Inbound 3000 from ALB"]
+                end
+                subgraph Priv2["Private Subnet AZ-2 (10.0.12.0/24)"]
+                    ECS2["🐳 ECS Fargate Task<br/>Frontend + Backend<br/>SG: Inbound 3000 from ALB"]
+                end
+            end
+
+            subgraph DataSubnets["Data Subnets (DB Tier)"]
+                subgraph Data1["Data Subnet AZ-1 (10.0.21.0/24)"]
+                    RDS1["🗄️ RDS Primary<br/>PostgreSQL 15<br/>SG: Inbound 5432 from ECS"]
+                end
+                subgraph Data2["Data Subnet AZ-2 (10.0.22.0/24)"]
+                    RDS2["�️ RDS Standby<br/>PostgreSQL 15<br/>Auto-failover"]
+                end
+            end
+        end
+
+        ECR["📦 ECR<br/>Container Registry"]
+        SecretsManager["🔑 Secrets Manager<br/>DB Credentials"]
+        CloudWatch["📊 CloudWatch<br/>Logs + Metrics"]
+    end
+
+    %% --- Traffic Flow ---
     User --> Route53
     Route53 --> CloudFront
-    CloudFront --> WAF
-    WAF --> ACM
-    ACM --> IGW
-    IGW --> ALB1
-    IGW --> ALB2
+    CloudFront -->|Origin Request| IGW
+    IGW --> ALB_ENI1
+    IGW --> ALB_ENI2
     
-    ALB1 --> ECS1
-    ALB2 --> ECS2
+    ALB_ENI1 -->|Port 3000| ECS1
+    ALB_ENI2 -->|Port 3000| ECS2
     
-    ECS1 --> RDS1
-    ECS2 --> RDS1
+    ECS1 -->|Port 5432| RDS1
+    ECS2 -->|Port 5432| RDS1
     
-    RDS1 -.Replication.-> RDS2
-    
+    RDS1 -.Sync Replication.-> RDS2
+
+    %% --- Outbound (Private → Internet via NAT) ---
     ECS1 --> NAT1
     ECS2 --> NAT2
     NAT1 --> IGW
     NAT2 --> IGW
-    
-    ECS1 -.Pull Images.-> ECR
-    ECS2 -.Pull Images.-> ECR
-    
-    ECS1 -.Get Secrets.-> SecretsManager
-    ECS2 -.Get Secrets.-> SecretsManager
-    
-    ECS1 -.Send Logs.-> CloudWatch
-    ECS2 -.Send Logs.-> CloudWatch
-    ALB1 -.Send Logs.-> CloudWatch
-    ALB2 -.Send Logs.-> CloudWatch
+
+    %% --- AWS Service Connections ---
+    ECS1 -.Pull Image.-> ECR
+    ECS2 -.Pull Image.-> ECR
+    ECS1 -.Fetch Secrets.-> SecretsManager
+    ECS2 -.Fetch Secrets.-> SecretsManager
+    ECS1 -.Logs.-> CloudWatch
+    ECS2 -.Logs.-> CloudWatch
 
     style User fill:#4A90E2
-    style Route53 fill:#FF9900
-    style CloudFront fill:#FF9900
-    style WAF fill:#DD344C
-    style ACM fill:#DD344C
-    style ALB1 fill:#FF9900
-    style ALB2 fill:#FF9900
-    style ECS1 fill:#FF9900
-    style ECS2 fill:#FF9900
-    style RDS1 fill:#3B48CC
-    style RDS2 fill:#3B48CC
-    style ECR fill:#FF9900
-    style SecretsManager fill:#DD344C
-    style CloudWatch fill:#FF9900
+    style Route53 fill:#FF9900,color:#000
+    style CloudFront fill:#FF9900,color:#000
+    style ALB_ENI1 fill:#FF9900,color:#000
+    style ALB_ENI2 fill:#FF9900,color:#000
+    style ECS1 fill:#FF9900,color:#000
+    style ECS2 fill:#FF9900,color:#000
+    style RDS1 fill:#3B48CC,color:#fff
+    style RDS2 fill:#3B48CC,color:#fff
+    style ECR fill:#FF9900,color:#000
+    style SecretsManager fill:#DD344C,color:#fff
+    style CloudWatch fill:#FF9900,color:#000
 ```
 
 ### Architecture Components
