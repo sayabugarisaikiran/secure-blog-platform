@@ -13,8 +13,6 @@
 #   docker-compose down -v        → Stop + delete data
 # ============================================================
 
-version: '3.8'
-
 services:
   # ========== Tier 3: Database (PostgreSQL) ==========
   db:
