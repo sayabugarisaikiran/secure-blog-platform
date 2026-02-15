@@ -137,6 +137,9 @@ graph TB
 | **Monitoring** | CloudWatch | Logs, metrics, alarms | ✅ Regional service |
 
 
+> 📖 **Security Deep Dive:** See [ARCHITECTURE_SECURITY.md](ARCHITECTURE_SECURITY.md) for detailed explanation of why backend is internal-only and how this architecture prevents direct API exposure.
+
+
 ## 🚀 Quick Start (Local Development)
 
 ### Prerequisites
